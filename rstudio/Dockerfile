@@ -1,7 +1,9 @@
-FROM rocker/verse:3.6.1
+FROM rocker/verse:3.6.3-ubuntu18.04
 MAINTAINER Jim Harner <ejharner@gmail.com>
 
-ARG pgversion=11
+ARG pgversion=9.6
+ARG jversion=8
+ARG jversion_full=1.8.0
 ARG hadoopversion=2.9.2
 ARG hiveversion=2.1.1
 ARG sparkversion=2.4.4
@@ -9,16 +11,17 @@ ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
 
 ENV JAVA_HOME /usr/lib/jvm/default-java
 
-COPY postgresKey.asc openjdkKey.asc /tmp/
-RUN apt-get update && apt-get install -y  apt-utils apt-transport-https ca-certificates wget dirmngr gnupg software-properties-common
-RUN add-apt-repository --yes 'deb http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main' && \
-	add-apt-repository --yes https://adoptopenjdk.jfrog.io/adoptopenjdk/deb/ && \
-	apt-key add /tmp/postgresKey.asc && \
-	apt-key add /tmp/openjdkKey.asc 
+RUN apt-get update && apt-get install -y  apt-utils apt-transport-https ca-certificates wget dirmngr gnupg software-properties-common openjdk-8-jdk
+RUN update-java-alternative -s /usr/lib/jvm/java-${jversion}-openjdk-amd64
+ENV JAVA_HOME /usr/lib/jvm/java-${jversion_full}-openjdk-amd64
+RUN R CMD javareconf
+
+RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - && \
+    add-apt-repository --yes 'deb http://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main'
 
 # Update machine and install 
 # RUN apt-get update && apt-get install -y --no-install-recommends apt-utils
-RUN apt-get update && apt-get install --no-install-recommends -y postgresql-client-${pgversion} libicu-dev adoptopenjdk-8-hotspot && apt-get clean && update-java-alternatives -s adoptopenjdk-8-hotspot-amd64
+RUN apt-get update && apt-get install --no-install-recommends -y postgresql-client-${pgversion} libicu-dev && apt-get clean
 
 ####################
 # HADOOP
@@ -61,7 +64,7 @@ RUN cd /opt && \
 # Set environment variable for rJava package installation
 ENV LD_LIBRARY_PATH $JAVA_HOME/jre/lib/amd64:$JAVA_HOME/jre/lib/amd64/server
 # Install R packages
-RUN Rscript -e "install.packages(c(\"rjson\", \"RJSONIO\", \"jsonlite\", \"functional\", \"R.methodsS3\", \"datadr\", \"trelliscope\", \"RPostgreSQL\", \"RJDBC\", \"housingData\", \"Lahman\", \"nycflights13\", \"flexdashboard\", \"sparklyr\", \"glmnet\", \"reticulate\", \"tensorflow\"), repos = 'http://cran.rstudio.com')"
+RUN Rscript -e "install.packages(c(\"rjson\", \"RJSONIO\", \"jsonlite\", \"functional\", \"R.methodsS3\", \"trelliscopejs\", \"RPostgreSQL\", \"RJDBC\", \"housingData\", \"Lahman\", \"nycflights13\", \"flexdashboard\", \"sparklyr\", \"glmnet\", \"reticulate\", \"tensorflow\"), repos = 'http://cran.rstudio.com')"
 # Copy repository packages to filesystem
 ADD rhdfs.tar.gz rmr.tar.gz /tmp/pkgs/
 # Install repository packages
@@ -84,6 +87,7 @@ RUN ln -s /usr/local/bin/Rscript /usr/bin/Rscript
 
 # Add path to profile so commands are found if attach to the container
 RUN echo "PATH='/opt/hadoop/bin:/opt/spark/bin:/opt/hive/bin:$PATH'" >> /etc/profile
+ENV PATH='/opt/hadoop/bin:/opt/spark/bin:/opt/hive/bin:$PATH'
 
 # Install TensorFlow Package
 # RUN R -e "install.packages(\"tensorflow\")"

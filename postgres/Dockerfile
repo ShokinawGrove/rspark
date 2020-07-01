@@ -1,4 +1,4 @@
-FROM library/ubuntu:xenial
+FROM library/ubuntu:bionic
 MAINTAINER Mark Lilback <mark@lilback.com>
 
 # Define Postgres Versions
@@ -10,12 +10,12 @@ ENV PGDIR /usr/lib/postgresql/${pgversion}/bin/
 ENV PGVERSION ${pgversion}
 
 # Add the PostgreSQL PGP key to verify their Debian packages.
-COPY postgresKey.asc /tmp/
 
 RUN apt-get update && apt-get install -y  apt-utils apt-transport-https ca-certificates \
 	wget dirmngr gnupg software-properties-common && \
-	add-apt-repository --yes 'deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg main' && \
-	apt-key add /tmp/postgresKey.asc && apt-get update
+	wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - && \
+    add-apt-repository --yes 'deb http://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main' && \
+    apt-get update
 
 # Install packages and Postgres
 RUN apt-get install -y python-software-properties postgresql-${pgversion} postgresql-client-${pgversion} postgresql-contrib-${pgversion} libpq-dev
