@@ -1,0 +1,22 @@
+# Useful commands for running experimental docker containers.
+
+# Pull and build ubuntu-18.04 image from docker hub
+docker run -ti ubuntu:bionic /bin/bash
+
+# Pull and build latest Rocker Project Build with username rstudio and password 0-a-b0t, not-a-bot, !-a-B0T ~A-BOT N0B0T
+docker run --user rstudio -e PASSWORD=
+
+# Restart container and hold open for at least 30 seconds
+docker restart -t 30
+docker restart --time 30
+
+# Check /etc/apt/sources.list for deb-src files that are commented out
+grep -G '# deb-src*' /etc/apt/sources.list
+
+# Copy to intermediate file to change
+cp /etc/apt/sources.list /etc/apt/sources.list.old
+
+# Uncomment all deb-src files in /etc/apt/sources.list
+sed -i '/deb-src/s/^# //' /etc/apt/sources.list
+
+
