@@ -11,9 +11,9 @@ ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
 
 ENV JAVA_HOME /usr/lib/jvm/default-java
 
-RUN apt-get update && apt-get install -y  apt-utils apt-transport-https ca-certificates wget dirmngr gnupg software-properties-common openjdk-8-jdk
-RUN update-java-alternative -s /usr/lib/jvm/java-${jversion}-openjdk-amd64
-ENV JAVA_HOME /usr/lib/jvm/java-${jversion_full}-openjdk-amd64
+RUN apt-get update && apt-get install -y  apt-utils apt-transport-https ca-certificates wget dirmngr gnupg software-properties-common openjdk-8-jdk git
+RUN update-java-alternatives -s /usr/lib/jvm/java-${jversion_full}-openjdk-amd64
+ENV JAVA_HOME /usr/lib/jvm/java-${jversion}-openjdk-amd64
 RUN R CMD javareconf
 
 RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - && \
@@ -64,7 +64,7 @@ RUN cd /opt && \
 # Set environment variable for rJava package installation
 ENV LD_LIBRARY_PATH $JAVA_HOME/jre/lib/amd64:$JAVA_HOME/jre/lib/amd64/server
 # Install R packages
-RUN Rscript -e "install.packages(c(\"rjson\", \"RJSONIO\", \"jsonlite\", \"functional\", \"R.methodsS3\", \"trelliscopejs\", \"RPostgreSQL\", \"RJDBC\", \"housingData\", \"Lahman\", \"nycflights13\", \"flexdashboard\", \"sparklyr\", \"glmnet\", \"reticulate\", \"tensorflow\"), repos = 'http://cran.rstudio.com')"
+RUN Rscript -e "install.packages(c(\"rjson\", \"RJSONIO\", \"jsonlite\", \"functional\", \"R.methodsS3\", \"trelliscopejs\", \"caTools\", \"RPostgreSQL\", \"RJDBC\", \"housingData\", \"Lahman\", \"nycflights13\", \"flexdashboard\", \"sparklyr\", \"glmnet\", \"reticulate\", \"tensorflow\"), repos = 'http://cran.rstudio.com')"
 # Copy repository packages to filesystem
 ADD rhdfs.tar.gz rmr.tar.gz /tmp/pkgs/
 # Install repository packages
@@ -87,7 +87,7 @@ RUN ln -s /usr/local/bin/Rscript /usr/bin/Rscript
 
 # Add path to profile so commands are found if attach to the container
 RUN echo "PATH='/opt/hadoop/bin:/opt/spark/bin:/opt/hive/bin:$PATH'" >> /etc/profile
-ENV PATH='/opt/hadoop/bin:/opt/spark/bin:/opt/hive/bin:$PATH'
+#ENV PATH='/opt/hadoop/bin:/opt/spark/bin:/opt/hive/bin:$PATH'
 
 # Install TensorFlow Package
 # RUN R -e "install.packages(\"tensorflow\")"
