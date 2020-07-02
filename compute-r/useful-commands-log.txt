@@ -19,4 +19,7 @@ cp /etc/apt/sources.list /etc/apt/sources.list.old
 # Uncomment all deb-src files in /etc/apt/sources.list
 sed -i '/deb-src/s/^# //' /etc/apt/sources.list
 
+# This prevents interactive installations from interfering with the execution of a Dockerfile.
+ARG DEBIAN_FRONTEND=noninteractive
+
 
