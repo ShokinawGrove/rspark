@@ -37,6 +37,10 @@ ARG DEBIAN_FRONTEND=noninteractive
 docker run --rm debian cat /etc/apt/apt.conf.d/docker-clean
 
 
+docker tag c0112de13130 big-r
+
+docker run -ti --rm big-r /bin/bash
+
 
 
 
