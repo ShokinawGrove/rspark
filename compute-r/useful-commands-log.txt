@@ -1,9 +1,10 @@
+# Chris Grant, 2020-07-01
 # Useful commands for running experimental docker containers.
 
 # Pull and build ubuntu-18.04 image from docker hub
 docker run -ti ubuntu:bionic /bin/bash
 
-# Pull and build latest Rocker Project Build with username rstudio and password 0-a-b0t, not-a-bot, !-a-B0T ~A-BOT N0B0T
+# Pull and build latest Rocker Project Build
 docker run --user rstudio -e PASSWORD=
 
 # Restart container and hold open for at least 30 seconds
@@ -21,5 +22,21 @@ sed -i '/deb-src/s/^# //' /etc/apt/sources.list
 
 # This prevents interactive installations from interfering with the execution of a Dockerfile.
 ARG DEBIAN_FRONTEND=noninteractive
+
+# CG 2020-07-02
+# Just learned that it is better to clean caches and tmp folders after every install to keep images
+# small, particularly those generated in between steps of a Dockerfile.  The collection of images generated
+# in that process, apparently, will pass on large caches, even if they are cleared in later RUN commands.
+# I call it 'residual inter-image data.'
+
+# Will try the following to end RUN commands where installation occurs, and bundle those actions so each
+# RUN step minimizes residual inter-image data:
+    apt-get clean  && \
+    rm -r /tmp/*
+# I found this one online (https://github.com/rocker-org/rocker/issues/35):
+docker run --rm debian cat /etc/apt/apt.conf.d/docker-clean
+
+
+
 
 
