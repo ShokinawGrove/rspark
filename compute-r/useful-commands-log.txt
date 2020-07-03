@@ -42,5 +42,9 @@ docker tag c0112de13130 big-r
 docker run -ti --rm big-r /bin/bash
 
 
+# 2020-07-03
+R CMD javareconf
+
+
 
 
